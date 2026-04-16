@@ -1,0 +1,14 @@
+{
+  "name": "Ciro Edwin Pimentel",
+  "short_name": "Ciro Edwin",
+  "icons": [
+    {
+      "src": "/images/edwin_2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ffffff",
+  "background_color": "#ffffff",
+  "display": "standalone"
+}
