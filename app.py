@@ -2,10 +2,32 @@ from flask import Flask, render_template, abort
 from flask_sock import Sock
 import os
 import threading
+from flask_sqlalchemy import SQLAlchemy
+from flask import jsonify, request
 
 # Configuración: los recursos (css, imgs) están en 'static' pero se sirven como si estuvieran en '/'
 app = Flask(__name__, static_folder='static', static_url_path='/')
 sock = Sock(app)
+
+# --- Configuración de Base de Datos MySQL / SQLite ---
+db_url = os.environ.get('MYSQL_URL') or os.environ.get('DATABASE_URL', 'sqlite:///local_stats.db')
+if db_url.startswith('mysql://'):
+    db_url = db_url.replace('mysql://', 'mysql+pymysql://')
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+class SongStats(db.Model):
+    id = db.Column(db.String(100), primary_key=True)
+    plays = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
+    loves = db.Column(db.Integer, default=0)
+
+with app.app_context():
+    db.create_all()
+# -----------------------------------------------------
 
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', '')
 
@@ -75,6 +97,41 @@ def gemini_ws_proxy(ws):
         except:
             pass
 
+
+# --- Rutas de Estadísticas de Canciones ---
+@app.route('/api/stats', methods=['GET'])
+def get_all_stats():
+    try:
+        stats = SongStats.query.all()
+        result = {s.id: {'plays': s.plays, 'likes': s.likes, 'loves': s.loves} for s in stats}
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/stats/<song_id>/action', methods=['POST'])
+def update_stat(song_id):
+    try:
+        data = request.json or {}
+        action = data.get('action') # 'play', 'like', 'love'
+        
+        stat = SongStats.query.get(song_id)
+        if not stat:
+            stat = SongStats(id=song_id)
+            db.session.add(stat)
+        
+        if action == 'play':
+            stat.plays += 1
+        elif action == 'like':
+            stat.likes += 1
+        elif action == 'love':
+            stat.loves += 1
+            
+        db.session.commit()
+        return jsonify({'success': True, 'plays': stat.plays, 'likes': stat.likes, 'loves': stat.loves})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+# ------------------------------------------
 
 @app.route('/')
 def home():

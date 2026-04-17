@@ -112,6 +112,13 @@
         </section>
 
         <!-- ===== SECCIÓN MÚSICA — REPRODUCTOR INTERACTIVO ===== -->
+        <style>
+            .song-stats-inline { margin-left:12px; font-size:0.85rem; display:inline-flex; gap:10px; opacity:0.9; }
+            .stat-badge { display:inline-flex; align-items:center; gap:4px; }
+            .stat-btn { cursor:pointer; transition:transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+            .stat-btn:active { transform:scale(0.9); }
+            .stat-btn:hover { transform:scale(1.2); }
+        </style>
         <section id="musica" class="musica-section reveal">
             <div class="container">
                 <h2 class="section-title">Mi Música</h2>
@@ -563,6 +570,39 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 renderMusicList();
             }
 
+            let globalSongStats = {}; // { 'song-id': { plays: 0, likes: 0, loves: 0 } }
+
+            async function fetchSongStats() {
+                try {
+                    const res = await fetch('/api/stats');
+                    globalSongStats = await res.json();
+                    renderMusicList(); // Redraw with actual numbers
+                } catch (e) {
+                    console.error("Error fetching stats:", e);
+                }
+            }
+
+            async function interactSong(event, songId, action) {
+                if (event) event.stopPropagation();
+                
+                if (!globalSongStats[songId]) globalSongStats[songId] = { plays: 0, likes: 0, loves: 0 };
+                
+                if (action === 'play') globalSongStats[songId].plays++;
+                else if (action === 'like') globalSongStats[songId].likes++;
+                else if (action === 'love') globalSongStats[songId].loves++;
+                
+                const el = document.getElementById(`${action}s-${songId}`);
+                if (el) el.textContent = globalSongStats[songId][action + 's'];
+                
+                try {
+                    await fetch(`/api/stats/${songId}/action`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action })
+                    });
+                } catch(e) { console.error('Error stats:', e); }
+            }
+
             // Renderizar lista de canciones
             function renderMusicList() {
                 const list = document.getElementById('music-song-list');
@@ -576,12 +616,21 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                     const storyIcon = hasStory ? '<span style="margin-left: 6px;">📖</span>' : '';
                     const tooltipAttr = hasStory ? 'title="Haz clic para leer la historia detrás de esta canción"' : '';
                     
+                    const stats = globalSongStats[c.id] || { plays: 0, likes: 0, loves: 0 };
+                    
                     return `
                     <div class="playlist-item ${i === musicCurrentIndex ? 'active' : ''}" id="music-item-${i}" onclick="musicPlayAt(${i})" ${tooltipAttr}>
                         <span class="playlist-num">${String(i + 1).padStart(2, '0')}</span>
                         <div class="playlist-info">
                             <span class="playlist-name">${c.titulo}${storyIcon}</span>
-                            <span class="playlist-dedicada">${musicActiveFilter === 'todos' ? '💝 ' + c.dedicada : ''}</span>
+                            <span class="playlist-dedicada">
+                                ${musicActiveFilter === 'todos' ? '💝 ' + c.dedicada : ''}
+                                <span class="song-stats-inline" title="Reproducciones y Me Gusta">
+                                    <span class="stat-badge" title="Reproducciones (Cuenta al reproducir)">👁️ <span id="plays-${c.id}">${stats.plays}</span></span>
+                                    <span class="stat-badge stat-btn" onclick="interactSong(event, '${c.id}', 'like')" title="¡Me gusta!">❤️ <span id="likes-${c.id}">${stats.likes}</span></span>
+                                    <span class="stat-badge stat-btn" onclick="interactSong(event, '${c.id}', 'love')" title="¡Me encanta!">💖 <span id="loves-${c.id}">${stats.loves}</span></span>
+                                </span>
+                            </span>
                         </div>
                         <span class="playlist-play-icon">${i === musicCurrentIndex ? '▶' : '♪'}</span>
                     </div>
@@ -592,6 +641,8 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
             function musicPlayAt(index) {
                 musicCurrentIndex = index;
                 const cancion = musicFilteredList[index];
+                
+                interactSong(null, cancion.id, 'play');
                 
                 // Botón de historia si existe localmente o como URL
                 let titleHtml = cancion.titulo;
@@ -646,6 +697,7 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
             document.addEventListener('DOMContentLoaded', function() {
                 renderFilterChips();
                 renderMusicList();
+                fetchSongStats();
             });
 
             // Funciones del Modal de Historia
