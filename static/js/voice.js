@@ -1,12 +1,6 @@
 // voice.js — Rimi Voice Assistant v4
 // Selección de tono (formal/informal) + acento (peruano/español)
 
-// ═══════════════════════════════════════════════════════════════════
-//  PERSONALIDADES DE RIMI (4 combinaciones)
-//  panelText   → texto mostrado en el card de bienvenida
-//  trigger     → mensaje simple que activa el saludo
-//  instruction → system_instruction: personalidad + saludo exacto integrado
-const RIMI_PERSONAS = {
 // Base de conocimientos inyectada al Asistente
 const RIMI_KNOWLEDGE_BASE = `
 INFORMACIÓN QUE DEBES SABER SOBRE EDWIN PORTOCARRERO PIMENTEL:
@@ -15,6 +9,11 @@ INFORMACIÓN QUE DEBES SABER SOBRE EDWIN PORTOCARRERO PIMENTEL:
 - **Biografía:** Doctor en Ciencias Físicas por la Univ. Complutense de Madrid. Nacido en Antabamba, Apurímac (Perú), vive en Madrid. Combina ciencia, arte, matemáticas, física, música con IA y literatura andina.
 `;
 
+// ═══════════════════════════════════════════════════════════════════
+//  PERSONALIDADES DE RIMI (4 combinaciones)
+//  panelText   → texto mostrado en el card de bienvenida
+//  trigger     → mensaje simple que activa el saludo
+//  instruction → system_instruction: personalidad + saludo exacto integrado
 const RIMI_PERSONAS = {
     formal_peruano: {
         panelText: `¡Bienvenido! Soy RIMI. Estás en el portal personal de Edwin Portocarrero, un peruano que combina la precisión de la física con la sensibilidad del arte.
