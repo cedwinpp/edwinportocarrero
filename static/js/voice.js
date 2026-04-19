@@ -190,7 +190,16 @@ class VoiceAssistant {
                 background: rgba(255,255,255,0.07);
                 border-radius: 12px;
                 border-left: 3px solid #f59e0b;
+                /* Mejoras para pantallas pequeñas */
+                max-height: 120px;
+                overflow-y: auto;
+                text-align: left;
+                scrollbar-width: thin;
+                scrollbar-color: rgba(245,158,11,0.5) transparent;
             }
+            .rimi-greeting::-webkit-scrollbar { width: 6px; }
+            .rimi-greeting::-webkit-scrollbar-track { background: transparent; }
+            .rimi-greeting::-webkit-scrollbar-thumb { background: rgba(245,158,11,0.5); border-radius: 4px; }
 
             /* ── Selectores de tono y acento ── */
             .rimi-selector-label {
