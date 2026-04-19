@@ -513,16 +513,31 @@ class VoiceAssistant {
                 silentGain.connect(this.inputContext.destination);
 
                 this.processor.onaudioprocess = (e) => {
-                    if (!this.isActive || !this.isReady || !this.ws || this.ws.readyState !== WebSocket.OPEN || this.modelSpeaking) return;
+                    // Si el WebSocket no está abierto, no hacemos nada
+                    if (!this.isActive || !this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+
                     const inputData = e.inputBuffer.getChannelData(0);
                     const pcm16     = new Int16Array(inputData.length);
-                    for (let i = 0; i < inputData.length; i++) {
-                        const c = Math.max(-1, Math.min(1, inputData[i]));
-                        pcm16[i] = c < 0 ? Math.round(c * 32768) : Math.round(c * 32767);
+                    
+                    // Si Rimi está hablando o aún no hemos enviado/completado el saludo, enviamos silencio
+                    // Así mantenemos vivo el WebSocket sin disparar el VAD (barge-in) del servidor.
+                    const sendSilence = this.modelSpeaking || !this.isReady;
+
+                    if (sendSilence) {
+                        pcm16.fill(0);
+                    } else {
+                        for (let i = 0; i < inputData.length; i++) {
+                            const c = Math.max(-1, Math.min(1, inputData[i]));
+                            pcm16[i] = c < 0 ? Math.round(c * 32768) : Math.round(c * 32767);
+                        }
                     }
+
                     const bytes = new Uint8Array(pcm16.buffer);
                     let binary  = '';
-                    for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+                    for (let i = 0; i < bytes.byteLength; i++) {
+                        binary += String.fromCharCode(bytes[i]);
+                    }
+                    
                     this.ws.send(JSON.stringify({
                         realtime_input: { media_chunks: [{ mime_type: 'audio/pcm;rate=16000', data: btoa(binary) }] }
                     }));
