@@ -463,7 +463,7 @@ class VoiceAssistant {
                 // Setup Gemini
                 this.ws.send(JSON.stringify({
                     setup: {
-                        model: 'models/gemini-2.5-flash-preview-native-audio-dialog',
+                        model: 'models/gemini-2.5-flash-native-audio-latest',
                         system_instruction: { parts: [{ text: persona.instruction }] },
                         generation_config: {
                             response_modalities: ["AUDIO"],
