@@ -503,14 +503,15 @@ class VoiceAssistant {
                     }
                 }));
 
-                // Captura de micrófono
-                const source      = this.inputContext.createMediaStreamSource(this.mediaStream);
+                // Captura de micrófono (Guardar en `this` para evitar Garbage Collection Bug de Chrome a los ~20-30 segs)
+                this.micSource    = this.inputContext.createMediaStreamSource(this.mediaStream);
                 this.processor    = this.inputContext.createScriptProcessor(2048, 1, 1);
-                const silentGain  = this.inputContext.createGain();
-                silentGain.gain.value = 0;
-                source.connect(this.processor);
-                this.processor.connect(silentGain);
-                silentGain.connect(this.inputContext.destination);
+                this.silentGain   = this.inputContext.createGain();
+                this.silentGain.gain.value = 0;
+                
+                this.micSource.connect(this.processor);
+                this.processor.connect(this.silentGain);
+                this.silentGain.connect(this.inputContext.destination);
 
                 this.processor.onaudioprocess = (e) => {
                     // Si el WebSocket no está abierto, no hacemos nada
@@ -645,9 +646,11 @@ class VoiceAssistant {
     stopVoice() {
         this.isActive = false;
         this.isReady  = false;
-        if (this.processor)    { this.processor.disconnect(); this.processor = null; }
-        if (this.mediaStream)  { this.mediaStream.getTracks().forEach(t => t.stop()); this.mediaStream = null; }
         if (this.ws)           { this.ws.close(); this.ws = null; }
+        if (this.processor)    { this.processor.disconnect(); this.processor = null; }
+        if (this.micSource)    { this.micSource.disconnect(); this.micSource = null; }
+        if (this.silentGain)   { this.silentGain.disconnect(); this.silentGain = null; }
+        if (this.mediaStream)  { this.mediaStream.getTracks().forEach(t => t.stop()); this.mediaStream = null; }
         if (this.inputContext) { this.inputContext.close();  this.inputContext  = null; }
         if (this.outputContext){ this.outputContext.close(); this.outputContext = null; }
         this.setStatus('hidden', '');
