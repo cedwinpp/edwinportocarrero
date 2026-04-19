@@ -4,6 +4,10 @@ import os
 import threading
 from flask_sqlalchemy import SQLAlchemy
 from flask import jsonify, request
+from dotenv import load_dotenv
+
+# Cargar variables de entorno desde .env (solo en desarrollo local)
+load_dotenv()
 
 # Configuración: los recursos (css, imgs) están en 'static' pero se sirven como si estuvieran en '/'
 app = Flask(__name__, static_folder='static', static_url_path='/')
