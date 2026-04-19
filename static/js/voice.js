@@ -535,10 +535,10 @@ class VoiceAssistant {
                     if (raw instanceof Blob) raw = await raw.text();
                     const response = JSON.parse(raw);
 
-                    // Setup completo → enviar saludo inicial
+                    // Setup completo → enviar saludo, aún NO activar micrófono
                     if (response.setupComplete || response.setup_complete) {
-                        this.isReady = true;
-                        this.setStatus('ready', 'Escuchando...');
+                        // isReady se activa DESPUÉS del saludo (en turnComplete)
+                        this.setStatus('connecting', 'Rimi preparando saludo...');
                         if (this.ws.readyState === WebSocket.OPEN) {
                             this.ws.send(JSON.stringify({
                                 client_content: {
@@ -567,6 +567,11 @@ class VoiceAssistant {
                             setTimeout(() => {
                                 this.modelSpeaking = false;
                                 this.nextPlayTime   = 0;
+                                // Activar micrófono SOLO cuando Rimi termina de hablar
+                                if (!this.isReady) {
+                                    this.isReady = true;
+                                    console.log('Saludo completo → micrófono activado');
+                                }
                                 this.setStatus('ready', 'Escuchando...');
                             }, waitMs + 200);
                         }
