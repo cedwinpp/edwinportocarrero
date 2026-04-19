@@ -121,3 +121,34 @@ if (document.getElementById('tts-controls')) {
         console.log('Tu navegador no soporta la API de Texto a Voz.');
     }
 }
+
+// --- MENÚ HAMBURGUESA DINÁMICO (RESPONSIVE) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const mainNavs = document.querySelectorAll('.main-nav');
+    
+    // Evita inyectar en pantallas grandes si no es necesario o lo maneja por CSS
+    mainNavs.forEach(nav => {
+        const ul = nav.querySelector('ul');
+        if (ul && !nav.querySelector('.hamburger-menu')) {
+            const hamburger = document.createElement('div');
+            hamburger.classList.add('hamburger-menu');
+            hamburger.innerHTML = '<span></span><span></span><span></span>';
+            
+            // Inyectar antes del UL
+            nav.insertBefore(hamburger, ul);
+
+            hamburger.addEventListener('click', () => {
+                ul.classList.toggle('active');
+                hamburger.classList.toggle('active');
+            });
+            
+            // Cerrar menú al hacer clic en un enlace (ideal para móviles)
+            ul.querySelectorAll('li a').forEach(link => {
+                link.addEventListener('click', () => {
+                    ul.classList.remove('active');
+                    hamburger.classList.remove('active');
+                });
+            });
+        }
+    });
+});
