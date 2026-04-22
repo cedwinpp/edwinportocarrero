@@ -125,9 +125,9 @@
                 <p class="section-intro">La música, al igual que la ciencia y la literatura, posee la magia de conectar con emociones profundas que a menudo escapan al alcance de las palabras. Cada melodía y ritmo de esta colección nace de un sentimiento sincero, un recuerdo preciado o la esencia de una persona especial. Estas creaciones son fruto de una colaboración única con la Inteligencia Artificial, que me ha ayudado a dar vida a estas visiones sonoras, capturando la esencia de mis historias. Algunas de estas composiciones van acompañadas de un relato que te sumergirá en la fuente de inspiración original. ¡Espero que encuentres una resonancia personal en cada una de ellas!</p>
 
                 <!-- NOTIFICACIÓN DE CANCIONES NUEVAS -->
-                <div class="music-new-alert" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0369a1; padding: 12px 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid #0ea5e9; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                    <span style="font-size: 0.95rem;">🎵 <strong>¡Novedad!</strong> Nuevas canciones añadidas en las listas <strong>Mamá</strong> y <strong>Edwin</strong>.</span>
-                    <button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #0369a1; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 0 0 15px;">&times;</button>
+                <div class="music-new-alert" id="music-new-alert" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: #0369a1; padding: 12px 20px; border-radius: 12px; margin-bottom: 25px; border-left: 5px solid #0ea5e9; display: none; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <span style="font-size: 0.95rem;">🎵 <strong>¡Novedad!</strong> Hemos añadido la canción <strong>¿Materia o Información?</strong> en la lista de <strong>Edwin</strong>.</span>
+                    <button onclick="cerrarAlertaNovedad()" style="background: none; border: none; color: #0369a1; font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 0 0 15px;">&times;</button>
                 </div>
 
                 <!-- FILTROS POR DEDICATORIA -->
@@ -319,6 +319,26 @@ Creo que soy feliz, porque me siento vivo y con ganas de vivir, porque conservo 
                 { titulo: "Hablar sin voz (v2)", id: "3f460be9-2a7e-4ec8-8a59-4ca6c507ad7d", dedicada: "Edwin" },
                 { titulo: "¿Soledad? (v1)", id: "787d0d84-55f1-493d-9337-2a735ed9bee3", dedicada: "Edwin" },
                 { titulo: "¿Soledad? (v2)", id: "e0f1a90b-c28a-4c7a-9b95-f6ea0c5fd666", dedicada: "Edwin" },
+                {
+                    titulo: "¿Materia o Información?(v1)",
+                    id: "267e4e42-3d3c-4109-8938-6fb04ead2a0a",
+                    dedicada: "Edwin",
+                    historia: `¿MATERIA O INFORMACIÓN?
+        Mamá me preguntó qué estaba pensando mientras estábamos junto al río Chaluanca, en la finca de los abuelos; es decir, en Cuycua. Ambos estábamos inmersos en ese aroma a molle típico de la tierra, en una de esas tardes donde la luz ámbar está a punto de inundar nuestro pequeño universo. Ella descansaba sobre una de las redondas piedras que adornaban las orillas, mientras yo lanzaba piedrecillas al agua. Mis pensamientos navegaban en las ondas que se formaban al golpear la superficie; muchas ideas surgían en mi mente, pero la mayoría se desvanecían tan rápido como una raya dibujada en el agua. En ese momento, no necesitaba nada más: la brisa fresca del río andino y el calor de la presencia materna me acercaban a lo que, seguramente, se siente al estar en el paraíso.
+        De repente, un capricho del azar alteró mi quietud: una piedra que arrojé no cayó al agua, sino que golpeó y desplazó a otra, ocupando su lugar. Fue entonces cuando una idea que alguna vez había cruzado por mi pensamiento ---y que no se había borrado como lo hace un trazo en la corriente--- se disparó en mi interior, de modo similar a cuando una presa se rompe y deja escapar el agua a presión.
+        Siempre he sido curioso por naturaleza. Conforme avanzaba en los últimos años de la primaria, en un colegio de mi pueblo ---incrustado en las lejanas entrañas de los Andes peruanos---, esa curiosidad se volvía más ávida. Encontrar novedades allí era difícil, dada la lejanía de las grandes ciudades donde ebullía el mundo moderno. Entonces, como un acto de rebeldía, se cruzó por mi pensamiento una idea atrevida: acudir al colegio secundario. Sabía que allí encontraría revelaciones que estaban a años de distancia de mi camino trazado por la oficialidad; allí encontré, finalmente, la gasolina para el fuego de mi curiosidad. En ese lugar, los conocimientos fluían como el agua de un manantial fresco. Siempre que podía, me asomaba a las aulas de los niveles más avanzados y, a escondidas, escuchaba extasiado aquellas explicaciones sobre asuntos que ni siquiera sabía que existían.
+        En una de esas ocasiones, escuché algo que me dejó perplejo. El profesor afirmaba que todo en el universo estaba formado por átomos, comparándolos con ladrillos. Mencionaba que existían apenas un centenar de tipos de estos "ladrillos" y que, combinándolos, se formaban las plantas, las rocas y las personas. Pero la verdadera sorpresa vino después: el profesor aseguró que los átomos del mismo tipo eran idénticos entre sí; era imposible diferenciarlos.
+        Reflexionando sobre esto, no podía evitar mirar los profundos ojos negros de mamá. Me imaginaba sustituyendo cada átomo de sus ojos por otros obtenidos de las flores o de los árboles. Me preguntaba si, tras el cambio, aquellos ojos seguirían siendo los mismos que yo conocía. Con aún más osadía, me cuestionaba: si cambiara cada átomo que la compone, ¿seguiría siendo mamá?
+    Arropado por la brisa, observaba las corrientes y caía en la cuenta de la extraña naturaleza de los ríos: siempre fluyen y parecen irse, pero el cauce permanece. Giré la cabeza para mirar a mamá y la descubrí inmersa en su propio interior, lanzando ramitas al agua. Decidí no interrumpirla; sentía que estaba en comunión consigo misma. No pude evitar reflexionar sobre si ella era consciente del calor que irradiaba a los corazones, como un fogón de leña, o si para ella ese amor era como el aire: algo que existe en verdad, pero que no se puede ver.
+    De pronto, mamá salió de su reflexión, me miró y preguntó: "¿En qué piensas, loquito?". Me entraron ganas de llorar, pero no de tristeza. Fue una emoción inmensa. Sabía que ella viajaría a Lima al día siguiente y que la probabilidad de repetir ese instante era mínima. Mi ser quiso sellar el momento con una emoción que solo pudo estallar en lágrimas.
+    Meses después, comprendí que la naturaleza de los ríos a veces nos traiciona: mamá se marchó, siguiendo la corriente del río Chaluanca, y no volvió. Con profunda tristeza, constaté que la probabilidad de aquel instante no era pequeña, sino nula. Mamá ahora es como el aire: ciertamente existe porque la siento, pero no la puedo ver. El Chaluanca sigue sonando igual sobre las piedras, aunque sus moléculas sean otras; del mismo modo, el vacío de mamá tiene la misma forma, aunque su cuerpo ya no esté allí para llenarlo.
+    Muchos años más tarde, un sueño me llevó a tierras lejanas. El precio fue la separación de mi tierra, una distancia que nunca supe administrar. En los momentos de aguas turbulentas, me refugiaba en el recuerdo de aquellas piedras redondas y el calor de mi madre. Tras cinco años de soledad y nostalgia, finalmente pude regresar.
+    Mientras caminaba por los pasillos del aeropuerto, intentaba controlar la emoción escuchando un audiolibro. De súbito, una frase me dejó perplejo: "aproximadamente cada cinco años se completa la sustitución de los átomos que nos componen por otros idénticos". Una idea latente resurgió con fuerza: si reemplazamos cada átomo, ¿qué somos? ¿Somos la materia cambiante o la información invisible que dicta cómo organizarla? ¿Soy el barro o el diseño?
+    Al salir, vi a mi padre oteando el horizonte con expectación, y a mis hermanos. El corazón me latía con violencia. Abracé fuertemente a mi padre, grabando el momento de forma indeleble. Al tocarlo, mis manos buscaban reconocer la estructura de su espalda, esa arquitectura invisible que los años y el cambio de átomos no habían logrado alterar. Le di aquel abrazo que esperó cinco años y besé su frente mientras ambos limpiábamos lágrimas contenidas.
+    Camino a casa, tras un torbellino de preguntas, se produjo un silencio. Mi mente no pudo frenar el razonamiento: han pasado más de cinco años. Si la ciencia es cierta, los átomos de mi familia ya no son los mismos, ni tampoco los míos. Entonces, ¿a quién abrazaron ellos? ¿Realmente regresé yo?
+    Al llegar, pasé mis dedos por las paredes de la casa que me vio crecer. Ella parecía la única que seguía siendo quien era; guardaba en sus poros el mismo polvo de cuando partí. Comprendí entonces que es verdad que ningún hombre puede cruzar el río dos veces, porque ni el hombre ni el agua serán nunca los mismos. Sin embargo, aunque los átomos fluyan como el Chaluanca, hay algo ---una esencia, una información, un amor--- que se queda sentado en la orilla para siempre.`
+                },
+                { titulo: "¿Materia o Información?(v2)", id: "45066a28-a88b-4fc5-8bd3-537afedbadb1", dedicada: "Edwin" },
                 { titulo: "El Árbol y sus Raíces (v1) (Milonga para mi Padre)", id: "4b1d5850-21a3-421e-8eb0-61867d6114ac", dedicada: "Papá" },
                 { titulo: "El Árbol y sus Raíces (v2) (Milonga para mi Padre)", id: "83b51864-4770-4422-9ef0-5dcba79ca9ee", dedicada: "Papá" },
                 { titulo: "El Vértigo y el Viento (v1) (Milonga para mi Padre)", id: "520a33ba-09c4-4f96-89c3-45f140803fc9", dedicada: "Papá" },
@@ -724,8 +744,19 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 window.open(url, '_blank');
             }
 
+            function cerrarAlertaNovedad() {
+                document.getElementById('music-new-alert').style.display='none';
+                localStorage.setItem('novedad_materia_info_v1', 'closed');
+            }
+
             // Inicializar
             document.addEventListener('DOMContentLoaded', function() {
+                if (localStorage.getItem('novedad_materia_info_v1') !== 'closed') {
+                    const alertEl = document.getElementById('music-new-alert');
+                    if (alertEl) {
+                        alertEl.style.display = 'flex';
+                    }
+                }
                 renderFilterChips();
                 renderMusicList();
                 fetchSongStats();
