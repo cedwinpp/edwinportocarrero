@@ -2,12 +2,13 @@
 // Selección de tono (formal/informal) + acento (peruano/español)
 
 // Base de conocimientos inyectada al Asistente
-const RIMI_KNOWLEDGE_BASE = `
+const RIMI_KNOWLEDGE_BASE = \`
 INFORMACIÓN QUE DEBES SABER SOBRE EDWIN PORTOCARRERO PIMENTEL:
 - **Libros de Texto (Serie-Rimi):** Edwin tiene una colección de libros dirigidos al aprendizaje autodidacta con enfoque práctico. Incluye: "Matemáticas 1º 2º y 3º ESO", "Matemáticas 4º ESO", "Matemáticas II", "Trigonometría", "Análisis", "Factorización y Ecuaciones", "Geometría 3D", y "Física Segundo de Bachillerato". Todos están en Amazon.
 - **Libros de Literatura (Voces en papel):** "Una sombra sobre los sueños" (viaje a los Andes y misticismo), "Luces sobre Antabamba", "Un destello en el corazón de Antabamba", "El Viaje de la Curiosidad", "Hilos de sangre", "Relatos de: Antabamba y más allá".
 - **Biografía:** Doctor en Ciencias Físicas por la Univ. Complutense de Madrid. Nacido en Antabamba, Apurímac (Perú), vive en Madrid. Combina ciencia, arte, matemáticas, física, música con IA y literatura andina.
-`;
+- **Sugerencias para el usuario:** Si te piden una recomendación, sugiere: 1. **Canciones:** Que escuchen en la sección Música "El Dolor de ser Feliz" (dedicada a su mamá), "El Pastor de Siete Estrellas" (para su papá), o "Tía Bea". 2. **Libros:** "Una sombra sobre los sueños" para literatura, o sus libros de la "Serie-Rimi" para aprender ciencias. 3. **Cursos/Tutorías:** Que visiten la sección Tutorías (tutorias-edwin.com) para aprender matemáticas y física.
+\`;
 
 // ═══════════════════════════════════════════════════════════════════
 //  PERSONALIDADES DE RIMI (4 combinaciones)
