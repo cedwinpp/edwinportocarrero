@@ -118,6 +118,37 @@
             .stat-btn { cursor:pointer; transition:transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
             .stat-btn:active { transform:scale(0.9); }
             .stat-btn:hover { transform:scale(1.2); }
+            
+            /* Estilos para Mi Lista de Reproducción */
+            .custom-context-menu {
+                position: fixed;
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+                border-radius: 8px;
+                padding: 5px 0;
+                min-width: 200px;
+                z-index: 9999;
+                display: none;
+                font-family: 'Lato', sans-serif;
+            }
+            .custom-context-menu ul { list-style: none; margin: 0; padding: 0; }
+            .custom-context-menu li {
+                padding: 10px 15px;
+                cursor: pointer;
+                color: #334155;
+                font-size: 0.95rem;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                transition: background 0.2s;
+            }
+            .custom-context-menu li:hover { background: #f1f5f9; color: #0ea5e9; }
+            .btn-remove-playlist {
+                background: none; border: none; color: #ef4444; font-size: 1.1rem;
+                cursor: pointer; padding: 0 5px; opacity: 0.7; transition: opacity 0.2s, transform 0.2s;
+            }
+            .btn-remove-playlist:hover { opacity: 1; transform: scale(1.2); }
         </style>
         <section id="musica" class="musica-section reveal">
             <div class="container">
@@ -719,6 +750,19 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
             let musicCurrentIndex = -1;
             let musicFilteredList = [...misCanciones];
             let musicActiveFilter = 'todos';
+            
+            // Cargar "Mi Lista" desde localStorage
+            function getMyPlaylist() {
+                try {
+                    const saved = localStorage.getItem('mi_lista_reproduccion');
+                    return saved ? JSON.parse(saved) : [];
+                } catch(e) { return []; }
+            }
+            
+            // Guardar "Mi Lista" en localStorage
+            function saveMyPlaylist(list) {
+                localStorage.setItem('mi_lista_reproduccion', JSON.stringify(list));
+            }
 
             // Obtener dedicatorias únicas
             function getDedicatorias() {
@@ -741,6 +785,12 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 // Chip "Todas"
                 let html = `<label class="filter-chip active" data-filter="todos" onclick="filterMusic('todos', this)">
                     <span class="chip-icon">🎵</span> Todas (${misCanciones.length})
+                </label>`;
+
+                // Chip "Mi Lista"
+                const myPlaylistCount = getMyPlaylist().length;
+                html += `<label class="filter-chip" data-filter="mi_lista" onclick="filterMusic('mi_lista', this)">
+                    <span class="chip-icon">⭐</span> Mi Lista (<span id="mi-lista-count">${myPlaylistCount}</span>)
                 </label>`;
 
                 // Emoji para cada dedicatoria
@@ -773,6 +823,13 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 if (filter === 'todos') {
                     musicFilteredList = [...misCanciones];
                     document.getElementById('dedicatoria-banner').style.display = 'none';
+                } else if (filter === 'mi_lista') {
+                    const myPlaylistIds = getMyPlaylist();
+                    musicFilteredList = misCanciones.filter(c => myPlaylistIds.includes(c.id));
+                    const banner = document.getElementById('dedicatoria-banner');
+                    banner.style.display = 'flex';
+                    document.getElementById('dedicatoria-name').textContent = 'Mi Lista Personalizada';
+                    document.getElementById('dedicatoria-count').textContent = musicFilteredList.length + ' canción' + (musicFilteredList.length !== 1 ? 'es' : '');
                 } else {
                     musicFilteredList = misCanciones.filter(c => Array.isArray(c.dedicada) ? c.dedicada.includes(filter) : c.dedicada === filter);
                     // Mostrar banner
@@ -840,8 +897,10 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                     
                     const stats = globalSongStats[c.id] || { plays: 0, likes: 0, loves: 0 };
                     
+                    const btnRemove = musicActiveFilter === 'mi_lista' ? `<button class="btn-remove-playlist" onclick="removeFromMyPlaylist(event, '${c.id}')" title="Quitar de mi lista">❌</button>` : '';
+                    
                     return `
-                    <div class="playlist-item ${i === musicCurrentIndex ? 'active' : ''}" id="music-item-${i}" onclick="musicPlayAt(${i})" ${tooltipAttr}>
+                    <div class="playlist-item ${i === musicCurrentIndex ? 'active' : ''}" id="music-item-${i}" onclick="musicPlayAt(${i})" oncontextmenu="showMusicContextMenu(event, '${c.id}')" ${tooltipAttr}>
                         <span class="playlist-num">${String(i + 1).padStart(2, '0')}</span>
                         <div class="playlist-info">
                             <span class="playlist-name">${c.titulo}${storyIcon}</span>
@@ -854,6 +913,7 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                                 </span>
                             </span>
                         </div>
+                        ${btnRemove}
                         <span class="playlist-play-icon">${i === musicCurrentIndex ? '▶' : '♪'}</span>
                     </div>
                 `}).join('');
@@ -994,7 +1054,101 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 document.getElementById('story-modal').style.display = 'none';
                 document.body.style.overflow = 'auto'; // Restaurar scroll
             }
+            
+            // Lógica para el menú contextual de Mi Lista
+            let contextMenuSongId = null;
+            function showMusicContextMenu(event, songId) {
+                event.preventDefault(); // Evitar el menú del navegador
+                contextMenuSongId = songId;
+                
+                const menu = document.getElementById('music-context-menu');
+                
+                // Si la canción ya está en la lista, mostrar opción para quitarla, sino para añadirla
+                const myPlaylist = getMyPlaylist();
+                const isAdded = myPlaylist.includes(songId);
+                
+                const ul = menu.querySelector('ul');
+                if (isAdded) {
+                    ul.innerHTML = `<li onclick="removeFromMyPlaylist(null, '${songId}'); closeMusicContextMenu();"><span style="color:#ef4444">❌</span> Quitar de Mi Lista</li>`;
+                } else {
+                    ul.innerHTML = `<li onclick="addToMyPlaylist('${songId}'); closeMusicContextMenu();"><span>⭐</span> Añadir a Mi Lista</li>`;
+                }
+                
+                menu.style.display = 'block';
+                
+                // Posicionar el menú
+                let x = event.clientX;
+                let y = event.clientY;
+                
+                // Ajustar si se sale de la pantalla
+                if (x + menu.offsetWidth > window.innerWidth) x = window.innerWidth - menu.offsetWidth - 10;
+                if (y + menu.offsetHeight > window.innerHeight) y = window.innerHeight - menu.offsetHeight - 10;
+                
+                menu.style.left = x + 'px';
+                menu.style.top = y + 'px';
+            }
+            
+            function closeMusicContextMenu() {
+                document.getElementById('music-context-menu').style.display = 'none';
+                contextMenuSongId = null;
+            }
+            
+            // Cerrar menú contextual al hacer clic en cualquier lado
+            document.addEventListener('click', function(event) {
+                const menu = document.getElementById('music-context-menu');
+                if (menu.style.display === 'block' && !menu.contains(event.target)) {
+                    closeMusicContextMenu();
+                }
+            });
+            
+            function addToMyPlaylist(songId) {
+                let list = getMyPlaylist();
+                if (!list.includes(songId)) {
+                    list.push(songId);
+                    saveMyPlaylist(list);
+                    
+                    // Actualizar contador
+                    const countSpan = document.getElementById('mi-lista-count');
+                    if (countSpan) countSpan.textContent = list.length;
+                    
+                    // Pequeña notificación visual
+                    const alertEl = document.getElementById('music-new-alert');
+                    if(alertEl) {
+                        alertEl.style.display = 'flex';
+                        alertEl.innerHTML = `<span>⭐ Canción añadida a tu lista de reproducción.</span><button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #0369a1; font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>`;
+                        setTimeout(() => { if(alertEl.innerHTML.includes('añadida')) alertEl.style.display='none'; }, 3000);
+                    }
+                }
+            }
+            
+            function removeFromMyPlaylist(event, songId) {
+                if (event) {
+                    event.stopPropagation(); // Evitar que reproduzca la canción
+                }
+                let list = getMyPlaylist();
+                list = list.filter(id => id !== songId);
+                saveMyPlaylist(list);
+                
+                // Actualizar contador
+                const countSpan = document.getElementById('mi-lista-count');
+                if (countSpan) countSpan.textContent = list.length;
+                
+                // Si estamos viendo "Mi Lista", refrescar
+                if (musicActiveFilter === 'mi_lista') {
+                    // Refrescar lista filtrada
+                    musicFilteredList = misCanciones.filter(c => list.includes(c.id));
+                    document.getElementById('dedicatoria-count').textContent = musicFilteredList.length + ' canción' + (musicFilteredList.length !== 1 ? 'es' : '');
+                    renderMusicList();
+                }
+            }
         </script>
+
+        <!-- Menú Contextual Oculto -->
+        <div id="music-context-menu" class="custom-context-menu">
+            <ul>
+                <!-- Rellenado por JS -->
+            </ul>
+        </div>
 
         <!-- Modal de Historia de Canción -->
         <div id="story-modal" class="story-modal-overlay" style="display: none;">
