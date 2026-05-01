@@ -752,17 +752,42 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
             let musicFilteredList = [...misCanciones];
             let musicActiveFilter = 'todos';
             
-            // Cargar "Mi Lista" desde localStorage
+            // Cargar "Mi Lista" desde localStorage o Cookie
             function getMyPlaylist() {
                 try {
-                    const saved = localStorage.getItem('mi_lista_reproduccion');
-                    return saved ? JSON.parse(saved) : [];
+                    let saved = localStorage.getItem('mi_lista_reproduccion');
+                    
+                    // Si no está en localStorage, intentar recuperar de las cookies
+                    if (!saved) {
+                        const name = "mi_lista_reproduccion=";
+                        const decodedCookie = decodeURIComponent(document.cookie);
+                        const ca = decodedCookie.split(';');
+                        for(let i = 0; i < ca.length; i++) {
+                            let c = ca[i].trim();
+                            if (c.indexOf(name) === 0) {
+                                saved = c.substring(name.length, c.length);
+                                // Restaurar a localStorage para la próxima vez
+                                localStorage.setItem('mi_lista_reproduccion', saved);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!saved) return [];
+                    const parsed = JSON.parse(saved);
+                    return Array.isArray(parsed) ? parsed : [];
                 } catch(e) { return []; }
             }
             
-            // Guardar "Mi Lista" en localStorage
+            // Guardar "Mi Lista" en localStorage y Cookie (por 1 año)
             function saveMyPlaylist(list) {
-                localStorage.setItem('mi_lista_reproduccion', JSON.stringify(list));
+                const str = JSON.stringify(list);
+                localStorage.setItem('mi_lista_reproduccion', str);
+                
+                // Guardar como cookie de larga duración (365 días)
+                const d = new Date();
+                d.setTime(d.getTime() + (365*24*60*60*1000));
+                document.cookie = "mi_lista_reproduccion=" + encodeURIComponent(str) + ";expires=" + d.toUTCString() + ";path=/";
             }
 
             // Obtener dedicatorias únicas
@@ -887,7 +912,11 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
             function renderMusicList() {
                 const list = document.getElementById('music-song-list');
                 if (musicFilteredList.length === 0) {
-                    list.innerHTML = '<div class="playlist-empty">No hay canciones en esta categoría</div>';
+                    if (musicActiveFilter === 'mi_lista') {
+                        list.innerHTML = '<div class="playlist-empty" style="text-align:center; padding:20px; color:#64748b;">Tu lista está vacía.<br><br>Añade canciones haciendo <strong>clic derecho</strong> (o manteniendo presionado en móvil) sobre cualquier canción y seleccionando "⭐ Añadir a Mi Lista".</div>';
+                    } else {
+                        list.innerHTML = '<div class="playlist-empty">No hay canciones en esta categoría</div>';
+                    }
                     return;
                 }
 
