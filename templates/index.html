@@ -936,10 +936,12 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                             <span class="playlist-name">${c.titulo}${storyIcon}</span>
                             <span class="playlist-dedicada">
                                 ${musicActiveFilter === 'todos' ? '💝 ' + (Array.isArray(c.dedicada) ? c.dedicada.join(', ') : c.dedicada) : ''}
-                                <span class="song-stats-inline" title="Reproducciones y Me Gusta">
+                                <span class="song-stats-inline" title="Estadísticas y Compartir">
                                     <span class="stat-badge" title="Reproducciones (Cuenta al reproducir)">👁️ <span id="plays-${c.id}">${stats.plays}</span></span>
                                     <span class="stat-badge stat-btn" onclick="interactSong(event, '${c.id}', 'like')" title="¡Me gusta!">❤️ <span id="likes-${c.id}">${stats.likes}</span></span>
                                     <span class="stat-badge stat-btn" onclick="interactSong(event, '${c.id}', 'love')" title="¡Me encanta!">💖 <span id="loves-${c.id}">${stats.loves}</span></span>
+                                    <span class="stat-badge stat-btn" onclick="compartirCancion(event, '${c.id}')" title="Copiar enlace de esta canción">🔗</span>
+                                    <span class="stat-badge stat-btn" onclick="compartirCancionFB(event, '${c.id}')" title="Compartir en Facebook" style="color: #1877f2; font-weight: bold;">f</span>
                                 </span>
                             </span>
                         </div>
@@ -1017,9 +1019,38 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 musicPlayAt(next);
             }
 
-            // Compartir Novedades
+            // Funciones para compartir canciones específicas
+            function getSongUrl(songId) {
+                // Utiliza edwinportocarrero.com si está en producción, o localhost en desarrollo
+                const baseUrl = window.location.hostname.includes('localhost') || window.location.hostname.includes('127.0.0') ? window.location.origin : 'https://edwinportocarrero.com';
+                return `${baseUrl}/?cancion=${songId}#musica`;
+            }
+
+            function compartirCancion(event, songId) {
+                if (event) event.stopPropagation();
+                const url = getSongUrl(songId);
+                navigator.clipboard.writeText(url).then(() => {
+                    const alertEl = document.getElementById('music-new-alert');
+                    if(alertEl) {
+                        alertEl.style.display = 'flex';
+                        alertEl.innerHTML = `<span>🔗 Enlace de la canción copiado. Puedes pegarlo donde quieras.</span><button onclick="this.parentElement.style.display='none'" style="background: none; border: none; color: #0369a1; font-size: 1.5rem; cursor: pointer; line-height: 1;">&times;</button>`;
+                        setTimeout(() => { if(alertEl.innerHTML.includes('copiado')) alertEl.style.display='none'; }, 4000);
+                    } else {
+                        alert('¡Enlace copiado al portapapeles!');
+                    }
+                }).catch(err => console.error('Error al copiar: ', err));
+            }
+
+            function compartirCancionFB(event, songId) {
+                if (event) event.stopPropagation();
+                const url = getSongUrl(songId);
+                const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                window.open(fbUrl, 'facebook-share-dialog', 'width=800,height=600');
+            }
+
+            // Compartir Novedades Generales
             function compartirNovedad() {
-                const text = "¡Hola! He añadido algunas novedades musicales a mi página. ¡Descúbrelas aquí!\n\nhttps://cedwinpp.github.io/#musica";
+                const text = "¡Hola! He añadido algunas novedades musicales a mi página. ¡Descúbrelas aquí!\n\nhttps://edwinportocarrero.com/#musica";
                 const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
                 window.open(url, '_blank');
             }
@@ -1040,6 +1071,21 @@ Podría seguir contando tantas cosas que nos unen, pero no quiero cansar. Ya lo 
                 renderFilterChips();
                 renderMusicList();
                 fetchSongStats();
+                
+                // Lógica para auto-reproducir una canción específica desde la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const cancionId = urlParams.get('cancion');
+                if (cancionId) {
+                    setTimeout(() => {
+                        const index = musicFilteredList.findIndex(c => c.id === cancionId);
+                        if (index !== -1) {
+                            musicPlayAt(index);
+                            // Desplazarse hasta el título del reproductor de música
+                            const playerTitle = document.getElementById('music-player-title');
+                            if (playerTitle) playerTitle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 500); // Pequeño retraso para que cargue la lista visualmente
+                }
             });
 
             // Funciones del Modal de Historia
